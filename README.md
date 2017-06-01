@@ -18,3 +18,5 @@ Features:
   * parse massive logfiles into a summary of just the errors
 * Fully documented
 * Can access functionality either through shortcuts or through menu items in gvim GUI
+
+Also contains an example gvimrc file that explains how to configure the plugin, and how to set up vim nicely in general.
