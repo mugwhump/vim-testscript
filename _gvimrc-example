@@ -1,0 +1,211 @@
+" This file contains configuration settings for your vim.
+" It includes the minimum settings to get the testscript plugin working.
+
+" vimconf is not vi-compatible
+set nocompatible
+filetype off
+" Remap <leader> (set before loading plugins)
+let mapleader=","
+
+
+" Initialize Vundle 
+set rtp+=~\vimfiles\bundle\Vundle.vim\
+let path='~\vimfiles\bundle'
+call vundle#begin(path)
+
+" PLUGINS -------------------------
+" To install these for the first time, type :PluginInstall
+" To update plugins, type :PluginUpdate
+" COMMENT OUT BUNDLE (with double-quotes) to disable (not uninstall) it
+
+" Plugin for Vundle, the plugin-manager itself. See :h vundle
+Plugin 'gmarik/Vundle.vim'
+
+" The location of the testscript plugin. See :h testscript
+Plugin 'mugwhump/vim-testscript'
+
+" FanfingTastic - multiline f's and t's. See :h fanfingtastic
+Plugin 'dahu/vim-fanfingtastic'
+
+" Glorious colorscheme
+Plugin 'nanotech/jellybeans.vim'
+
+" <Tab> everything! Press tab for autocomplete. See :h supertab
+Plugin 'ervandew/supertab'
+
+" A much better statusline
+Plugin 'bling/vim-airline'
+
+" Super easy commenting, toggle comments etc
+" \c<space> to easily toggle all line comments! Check the help.
+Plugin 'scrooloose/nerdcommenter'
+
+" A file tree explorer. 
+" Press F2 to see current directory.
+Plugin 'scrooloose/nerdtree'
+
+" Handle surround chars like ''
+" Press ysw" to surround a word with " etc
+" Amazing plugin, learn this one. See :h surround
+Plugin 'tpope/vim-surround'
+
+" localrc. Load different _gvimrcs depending on which folder you're in.
+Plugin 'thinca/vim-localrc'
+
+" Tablineset - muck with the tab line
+Plugin 'vim-scripts/TabLineSet.vim'
+
+" Need this to fix weird Windows bug of bundles not loading
+call vundle#config#require(g:bundles)
+" End vundle
+call vundle#end()
+filetype plugin indent on
+
+" -------------- TESTSCRIPT VARIABLES ---------------
+" NOTE: remember to use normal slashes (/) not backslashes (\) for paths!
+" Path to root folder of my automation files
+let tsProjectFolder = "PATH_TO_YOUR_PROJECT_FOLDER"
+" This is the path to TF.exe, the program that lets you do version control
+" from the command line. It might have a path like this:
+" C:/Program Files (x86)/Microsoft Visual Studio 11.0/Common7/IDE/TF.exe
+let tsTfsExePath = "PATH_TO_YOUR_TF.exe"
+
+" Filenames for my ts / csv files are huge, so only keep characters after 2nd
+" last period.
+call add( g:TabLineSet_bufname_filters, [ '.\{-}\.\([^\.]\+\.ts\)$', '\1' ])
+call add( g:TabLineSet_bufname_filters, [ '.\{-}\.\([^\.]\+\.csv\)$', '\1' ])
+" For vim-surround plugin: use - in testscript files to surround with "% %"
+" (quotes and percents). Ex: type ysW- to surround the WORD with that.
+autocmd FileType testscript let b:surround_45 = "\"%\r%\""
+
+" ------------- KEYBOARD SHORTCUTS ----------------
+
+" Press jk to leave insert mode
+inoremap jk <Esc>`^
+
+" Switch tabs with SHIFT+h/l
+nnoremap <S-h> gT
+nnoremap <S-l> gt
+
+" Do big horizontal scrolling with zh/zl
+nnoremap zh zH
+nnoremap zl zL
+
+" Close tab (del buffer) in normal mode with ctrl-backspace 
+nnoremap <C-BS> :bd<CR>
+
+" Quit all tabs with QQ
+nmap QQ :qa<CR>
+
+" Refresh with F5
+nnoremap <f5> :e<CR>
+
+" Press ctrl-s to save
+noremap <silent> <C-s> :w<CR>
+
+" User Ctrl-h/j/k/l to navigate in insert mode"
+inoremap <C-h> <Left>
+inoremap <C-j> <Down>
+inoremap <C-k> <Up>
+inoremap <C-l> <Right>
+
+" Quickly edit/source .vimrc
+noremap <leader>ve :tabe $HOME/_gvimrc<CR>
+noremap <leader>vs :source $HOME/_gvimrc<CR>
+
+" Yank(copy) to system clipboard
+noremap <leader>y "+y
+
+" Paste from system clipboard
+noremap <leader>p "+p
+noremap <leader>P "+P
+
+" Treat wrapped lines as normal lines
+nnoremap j gj
+nnoremap k gk
+
+" Move a line of text using ALT-{j,k}
+nmap <M-j> mz:m+<CR>`z
+nmap <M-k> mz:m-2<CR>`z
+
+" Toggle the NERDTree file browser
+map <F2> :NERDTreeToggle<CR>
+
+" Press ctrl-h/l to move tabs left and right
+nnoremap <c-h> :call TabLeft()<CR>
+nnoremap <c-l> :call TabRight()<CR>
+function! TabLeft()
+	let tab_number = tabpagenr() - 1
+	if tab_number == 0
+		execute "tabm" tabpagenr('$') - 1
+	else
+		execute "tabm" tab_number - 1
+	endif
+endfunction
+
+function! TabRight()
+	let tab_number = tabpagenr() - 1
+	let last_tab_number = tabpagenr('$') - 1
+	if tab_number == last_tab_number
+		execute "tabm" 0
+	else
+		execute "tabm" tab_number + 1
+	endif
+endfunction
+
+" ------------- SOME MISC OPTIONS ----------------
+
+if has("syntax")
+	syntax on
+endif
+
+set showmatch		" Show matching brackets.
+set ignorecase		" Do case insensitive matching
+set smartcase		" Do smart case matching
+set incsearch		" Incremental search
+set autowrite		" Automatically save before commands like :next and :make
+set mouse=a			" Enable mouse usage (all modes)
+set smartindent		" Automatically indent"
+set shiftround      " be clever with tabs
+set shiftwidth=4    " default 8
+set smarttab        " tab to 0,4,8 etc.
+set softtabstop=4   " 'tab' feels like <tab>
+set tabstop=4       " replace <TAB> w/4 spaces
+set noswapfile		" Swapfiles are evil
+set switchbuf=usetab,newtab "Open new buffers in new tabs, and look for already open tabs first.
+set path=$PWD/**	" Set path to the working directory and all subfolders (useful for finding files)
+set t_Co=256        " 256-colors
+set background=dark " we're using a dark bg
+colors jellybeans   " select colorscheme
+set cursorline      " hilight cursor line
+set wildmenu        " better auto complete
+set hidden          " buffer change, more undo
+set history=1000    " default 20
+set iskeyword+=_,$,@,%,#    " not word dividers
+set laststatus=2    " always show statusline
+set listchars=tab:>\    " > to highlight <tab>
+set list            " displaying listchars
+set noshowmode      " hide mode, got powerline
+set nostartofline   " keep cursor column pos
+set nowrap          " don't wrap line
+set textwidth=0     " Don't insert newlines for lines > 80 chars
+set guioptions+=b 	" Add a horizontal scrollbar
+set backspace=indent,eol,start  " smart backspace
+
+"If your italics are cut off in windows, try changing the font.
+"Download Inconsolata-dz for a nice one.
+"set guifont=Inconsolata-dz					"Change font used
+
+" Creates a command-line abbreviation of %% for the current file's directory.
+" This lets you write stuff like ':e %%/foo.txt' to open foo.txt without
+" having to change the current directory.
+cabbr <expr> %% expand('%:p:h')
+
+" Tablineset tab configuration
+let g:TabLineSet_verbose = 'modified, windows, buffers_list' "join( g:TabLineSet_verbose_sets[5], ',' )"
+
+" Automatically watch for changes in vimrc and reload vim when detected
+augroup myvimrc " {
+	au!
+	au BufWritePost $MYVIMRC so $MYVIMRC
+augroup END " }

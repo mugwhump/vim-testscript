@@ -1,0 +1,161 @@
+                              TestScript Reference
+                                *testscript.txt*
+                                Grayson Bartlet
+
+
+================= About~
+This plugin provides various utilities for working with .ts (testscript)
+files, including syntax highlighting, version control shortcuts,
+auto-inserting %DOUBLESLASH%, opening the reference for a QAPlayer statement,
+various methods for jumping to .ts and .csv files, and setting some small
+options (for indentation keywords, comment strings, and tab usage).
+
+														*testscript-variables*
+================= Setting variables~
+There are some variables that can be set in your vimrc. Most are optional, but
+|tsProjectFolder| and |tsTfsExePath| must be set for the plugin to work.
+															 *tsProjectFolder*
+tsProjectFolder (Must set!)~
+tsProjectFolder gives the path to the root folder of your project. All your 
+test script files should be found under it.
+Note: use regular slashes for the filepath, or escape the backslashes.
+																*tsTfsExePath*
+tsTfsExePath (Must set!)~
+tsTfsExePath is the path to TF.exe, the program that lets you do version 
+control from the command line. You may need to install TFS power tools.
+The exe might be found at this path: 
+C:/Program Files (x86)/Microsoft Visual Studio 11.0/Common7/IDE/TF.exe
+Note: use regular slashes for the filepath, or escape the backslashes.
+															 *tsReferenceFile*
+tsReferenceFile~
+tsReferenceFile gives the path to the text file of QAPlayer's documentation. 
+You can create the file just by saving the word file to .txt format. A file is
+included in vim-testscript/txt/QAPlayer_Scripting_Language_Syntax.txt, but you
+may update it manually or change the path if you like.
+Note: statements are located in the .txt file by looking for a line where the
+statement name is the only thing on it. If there are any other non-space
+characters on the line, the statement won't be found!
+                                                                  *tsSpiraURL*
+tsSpiraURL~
+The beginning of the url for a test case's Spira page, before the test case
+number. If the full URL for TC123095 is:
+    http://spiratest/SpiraTest/46/TestCase/123095.aspx
+then tsSpiraURL should be set to
+    http://spiratest/SpiraTest/46/TestCase/
+This is actually set as the default, and will work for tests in the
+"Absolute- Next Gen" project. If your tests are in the "Corporate" project,
+you'll want to set the URL to
+    http://spiratest/SpiraTest/15/TestCase/
+                                                      *tsReplaceDoubleSlash*
+tsReplaceDoubleSlash~
+Normally, if you type // inside a string in a .ts file, it will automatically
+be replaced with %DOUBLESLASH%. To disable this behaviour, set this variable
+to 0.
+                                                      *tsVariableDefiningStatements*
+
+tsVariableDefiningStatements~
+This is used by the |testscript#FindVariable()| function when searching for
+variable definitions. It is a pipe-separated string listing several QAPlayer
+statements. Its default value is >
+    "SetVariable|SetDateVariable|SetIntegerVariable|SplitToVariable|SetRandom
+    NumberToVariable|SetRandomStringToVariable|SetFileVariable|SetBinGuidVariable
+    |SetBinGuidVariableFromBin|CreateArrayVar"
+When searching, vim searches for the statement, them some space, then the
+variable. This works for statements where the variable comes right after the
+statement (like SetVariable), but not ones where it's the 2nd, 3rd, or 4th
+argument. For the GetWebText statement, where the variable is the 2nd
+argument, add |GetWebText(\\s+\\S+){1} to the end of the string (remember the |
+character). If the variable's the fifth argument, like for
+IsWebElementPresent, change the 1 to a 4. Ex) >
+    let g:tsVariableDefiningStatements .= "|IsWebElementPresent(\\s+\\S+){4}"
+<
+
+														*testscript-functions*
+================= Functions~
+This plugin defines several useful functions, which are given default key
+mappings. To overwrite these mappings, first set g:auto_map_testscript_keys to
+0. Then, remap it like so: >
+    let g:auto_map_testscript_keys = 0
+    nnoremap <leader>lk :exec "call testscript#OpenTs()"<CR>
+<
+The above would disable all default mappings, and map 'lk' to the OpenTs()
+function.
+                                                         *testscript#OpenTs()*
+testscript#OpenTs()~
+Default mapping: <leader>ot
+When the cursor is on a line containing an 'ExecuteScript' statement, this
+will jump to the script being executed.
+Test Scripts must be located under |tsProjectFolder|.
+                                                        *testscript#OpenCsv()*
+testscript#OpenCsv()~
+Default mapping: <leader>oc
+When the cursor is on a line containing an 'ExecuteScript' statement, this
+will jump to the csv being used with the script, if there is one.
+CSVs must be located under |tsProjectFolder|.
+                                          *testscript#FindUsesOfCurrentFile()*
+testscript#FindUsesOfCurrentFile()~
+Default mapping: <leader>fu
+Finds scripts where the current .ts or .csv file is used. Does this by
+grepping (searching) for scripts under your |tsProjectFolder| where the file
+is used by an "ExecuteScript" or "ExecuteScriptIfError" statement.
+                                                   *testscript#FindVariable()*
+testscript#FindVariable()~
+Default mapping: <leader>fv
+Searches for the definition of the variable under the cursor. Uses
+|tsVariableDefiningStatements| to determine which statements are capable of
+defining variables. By default only some statements are searched for (Like
+the various 'Set__Variable' ones and CreateArrayVar), but there are many other
+statements that can define variables (like GetWebText). Also remember that
+your cursor must be on the word.
+                                      *testscript#OpenReferenceForFirstWord()*
+testscript#OpenReferenceForFirstWord()~
+Default mapping: <leader>r
+Jumps to the documentation for the statement on the current line. This uses
+the .txt file referred to by the |tsReferenceFile| variable.
+                                                 *testscript#SwitchTcAndCsv()*
+testscript#SwitchTcAndCsv()~
+Default mapping: <leader>s
+Switches between a .ts file and its matching .csv file. If you call this while
+NextGen.TC123456.ts is open, it'll open NextGen.TC123456.csv in a new tab, and
+vice-versa if you have the .csv open. 
+Note: this only works if the filenames are identical (excluding the suffix).
+                                                      *testscript#OpenSpira()*
+testscript#OpenSpira()~
+Default mapping: <leader>os
+Opens the spira page for the current test case. If the active file is not a
+.ts or .csv for a test case, user will be prompted for the test case number.
+Uses the |tsSpiraURL| variable to determine the correct URL.
+                                                *testscript#PromptOpenTCNum()*
+testscript#PromptOpenTCNum()~
+Default mapping: <leader>t
+Opens the testscript for the Test Case with the number entered at the prompt.
+Test Cases must be located under |tsProjectFolder|.
+                                            *testscript#CheckoutCurrentFile()*
+testscript#CheckoutCurrentFile()~
+Default mapping: <leader>vco
+Checks Out the current file in Version Control. If you're being annoyed by
+read-only files, use this. 
+Uses |tsTfsExePath| to find the tfs program.
+                                             *testscript#CheckinCurrentFile()*
+testscript#CheckinCurrentFile()~
+Default mapping: <leader>vci
+Checks In the current file in Version Control (if it's been checked out). A
+dialog will popup letting you select other files to check in, with a text box
+for comments.
+Uses |tsTfsExePath| to find the tfs program.
+                                                 *testscript#AddCurrentFile()*
+testscript#AddCurrentFile()~
+Default mapping: <leader>vca
+Adds the current file to version control.
+Uses |tsTfsExePath| to find the tfs program.
+                                                *testscript#UpdateWorkspace()*
+testscript#UpdateWorkspace()~
+Default mapping: <leader>vcu
+Updates the workspace in Version Control. Does the same thing as
+right-clicking on the folder specified by |tsProjectFolder| and selecting "Get
+Latest Version".
+Uses |tsTfsExePath| to find the tfs program.
+
+
+
+vim:ft=help:ts=4
